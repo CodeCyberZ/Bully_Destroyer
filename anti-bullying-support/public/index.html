@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project BULLY DESTROYER</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">🛡️</span>
+      <h1>Project BULLY DESTROYER</h1>
+    </div>
+    <div class="header-actions">
+      <button id="themeToggle" aria-label="Toggle dark mode">Dark mode</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Login page -->
+    <section id="page-login" class="page active" aria-label="Login page">
+      <div class="card">
+        <h2>Choose how to enter</h2>
+        <div class="login-grid">
+          <div class="login-card">
+            <h3>Admin login</h3>
+            <form id="adminLoginForm">
+              <label for="adminUsername">Username</label>
+              <input id="adminUsername" type="text" value="admin" autocomplete="username" required />
+              <label for="adminPassword">Password</label>
+              <input id="adminPassword" type="password" autocomplete="current-password" required />
+              <button type="submit">Login as admin</button>
+            </form>
+            <p class="hint">Only one admin account exists.</p>
+          </div>
+          <div class="login-card">
+            <h3>User login (anonymous)</h3>
+            <form id="userLoginForm">
+              <label for="userUsername">Choose a unique username</label>
+              <input id="userUsername" type="text" placeholder="e.g., brave_fox" required />
+              <button type="submit">Enter lobby</button>
+            </form>
+            <p class="hint">No password needed. Your privacy matters.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact card">
+        <h3>Professional assistance</h3>
+        <p>If you’re in immediate danger, seek local emergency support right away.</p>
+        <ul>
+          <li><strong>School counselor:</strong> Reach out if available.</li>
+          <li><strong>Trusted adult:</strong> Family, teacher, mentor.</li>
+          <li><strong>Local resources:</strong> Add your region’s support contacts here.</li>
+        </ul>
+        <p class="hint">Admins can customize this section for your community.</p>
+      </div>
+    </section>
+
+    <!-- Lobby page -->
+    <section id="page-lobby" class="page" aria-label="Lobby page">
+      <div class="card">
+        <div class="page-top">
+          <h2>Lobby</h2>
+          <div class="actions">
+            <button id="backToLogin">Back</button>
+            <button id="openSettings">Account settings</button>
+            <button id="logoutUser">Logout</button>
+          </div>
+        </div>
+        <div class="presence">
+          <span id="adminPresence">Admin: offline</span>
+        </div>
+        <div class="mood">
+          <label for="moodSelect">How are you feeling?</label>
+          <select id="moodSelect">
+            <option value="">Prefer not to say</option>
+            <option value="anxious">Anxious</option>
+            <option value="sad">Sad</option>
+            <option value="angry">Angry</option>
+            <option value="confused">Confused</option>
+            <option value="hopeful">Hopeful</option>
+          </select>
+        </div>
+        <div class="list">
+          <h3>People here</h3>
+          <ul id="lobbyList" class="user-list"></ul>
+        </div>
+        <div class="cta">
+          <button id="openChatFromLobby">Open chat</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin dashboard -->
+    <section id="page-admin" class="page" aria-label="Admin dashboard">
+      <div class="card">
+        <div class="page-top">
+          <h2>Dashboard</h2>
+          <div class="actions">
+            <button id="backToLoginAdmin">Back</button>
+            <button id="logoutAdmin">Logout</button>
+          </div>
+        </div>
+        <div class="presence">
+          <span>Welcome, admin. You are online.</span>
+        </div>
+        <div class="tags">
+          <label>Conversation tags:</label>
+          <div class="tag-buttons">
+            <button class="tag-btn" data-tag="encouragement">Encouragement</button>
+            <button class="tag-btn" data-tag="listening">Listening</button>
+            <button class="tag-btn" data-tag="resources">Resources</button>
+            <button class="tag-btn" data-tag="referral">Referral</button>
+          </div>
+        </div>
+
+        <div class="list">
+          <h3>User conversations</h3>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Status</th>
+                <th>Mood</th>
+                <th>Messages</th>
+                <th>Unread</th>
+                <th>Last activity</th>
+                <th>Open</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chat page -->
+    <section id="page-chat" class="page" aria-label="Chat page">
+      <div class="card chat-card">
+        <div class="page-top">
+          <h2 id="chatTitle">Chat</h2>
+          <div class="actions">
+            <button id="backFromChat">Back</button>
+          </div>
+        </div>
+
+        <div class="chat-container">
+          <div id="chatMessages" class="messages" aria-live="polite"></div>
+
+          <div class="quick-replies">
+            <h4>Quick replies</h4>
+            <div id="quickReplies" class="quick-grid"></div>
+          </div>
+
+          <div class="composer">
+            <input id="chatInput" type="text" placeholder="Type a message..." />
+            <button id="sendBtn">Send</button>
+          </div>
+
+          <div id="typingIndicator" class="typing">Someone is typing...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings modal -->
+    <dialog id="settingsDialog" class="modal">
+      <form method="dialog" class="modal-content">
+        <h3>Account settings</h3>
+        <label for="displayName">Display name</label>
+        <input id="displayName" type="text" />
+        <div class="modal-actions">
+          <button id="saveSettings" value="save">Save</button>
+          <button id="deleteAccount" class="danger" value="delete">Delete account</button>
+          <button id="closeSettings" value="cancel">Close</button>
+        </div>
+      </form>
+    </dialog>
+  </main>
+
+  <footer class="app-footer">
+    <p>Built for care and connection. Be kind.</p>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
