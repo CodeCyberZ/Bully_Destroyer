@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script defer src="/socket.io/socket.io.js"></script>
+  <script defer src="js/client.js"></script>
+  <script defer src="js/admin.js"></script>
+</head>
+<body>
+<header>
+  <a href="index.html" class="btn ghost">Back</a>
+  <h1>Admin dashboard</h1>
+  <button id="themeToggle" class="btn ghost">Toggle theme</button>
+</header>
+
+<main class="grid two">
+  <section class="card">
+    <h2>Active sessions</h2>
+    <ul id="sessionList" class="list"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Conversation</h2>
+    <div class="toolbar">
+      <button id="closeSession" class="btn danger">Close session</button>
+    </div>
+    <ul id="adminMessages" class="messages"></ul>
+
+    <div class="composer">
+      <input id="adminInput" placeholder="Type a supportive message…" />
+      <button id="adminSend" class="btn primary">Send</button>
+    </div>
+
+    <h3>Quick replies</h3>
+    <div id="adminQuickReplies" class="chips"></div>
+
+    <h3>Notes</h3>
+    <textarea id="adminNotes" placeholder="Private notes (not visible to users)"></textarea>
+  </section>
+</main>
+</body>
+</html>
