@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <div class="main-chat">
+                <div style="padding: 15px; border-bottom: 1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Support Chat</h3>
+                    <div>
+                        <button onclick="location.href='index.html'" class="btn btn-secondary">Logout</button>
+                        <button onclick="deleteAccount()" class="btn btn-danger">Delete Account</button>
+                    </div>
+                </div>
+
+                <div id="messages" class="messages"></div>
+
+                <div class="quick-replies">
+                    <div class="chip" onclick="fillMsg('I am being bullied at school.')">School Bullying</div>
+                    <div class="chip" onclick="fillMsg('I feel unsafe right now.')">Unsafe</div>
+                    <div class="chip" onclick="fillMsg('I need advice on how to handle this.')">Need Advice</div>
+                </div>
+
+                <div class="controls">
+                    <input type="text" id="msg-input" placeholder="Type your message..." style="width:100%;">
+                    <button onclick="sendMessage()" class="btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const username = localStorage.getItem('bd_username');
+
+        if (!username) window.location.href = 'login.html';
+        if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+        // Join Server
+        socket.emit('user_join', username);
+
+        // Receive Message
+        socket.on('receive_message', (data) => {
+            const div = document.createElement('div');
+            div.className = `msg ${data.sender === 'user' ? 'self' : 'other'}`;
+            div.innerHTML = `<b>${data.name}</b>: ${data.text} <br><small style="font-size:0.7em; opacity:0.7;">${data.time}</small>`;
+            document.getElementById('messages').appendChild(div);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('msg-input');
+            if (input.value.trim()) {
+                socket.emit('user_message', input.value);
+                input.value = '';
+            }
+        }
+
+        function fillMsg(text) {
+            document.getElementById('msg-input').value = text;
+        }
+
+        function deleteAccount() {
+            if(confirm("Are you sure? This will delete your session.")) {
+                socket.emit('delete_account');
+                localStorage.removeItem('bd_username');
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" style="justify-content:center; align-items:center;">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <div style="margin-bottom: 20px;">
+                <button onclick="showForm('user')" class="btn">User Login</button>
+                <button onclick="showForm('admin')" class="btn btn-secondary">Admin Login</button>
+            </div>
+
+            <div id="user-form">
+                <h3>Anonymous Login</h3>
+                <input type="text" id="username" placeholder="Choose a nickname...">
+                <br>
+                <button onclick="loginUser()" class="btn">Start Chatting</button>
+                
+                <div id="quick-login-area" style="display:none; margin-top:15px; border-top:1px solid #eee; padding-top:10px;">
+                    <p>Continue as <b id="saved-name"></b>?</p>
+                    <button onclick="quickLogin()" class="btn">Yes, continue</button>
+                    <button onclick="clearData()" class="btn btn-danger">No, forget me</button>
+                </div>
+            </div>
+
+            <div id="admin-form" style="display:none;">
+                <h3>Admin Access</h3>
+                <input type="text" id="admin-user" placeholder="Username">
+                <input type="password" id="admin-pass" placeholder="Password">
+                <br>
+                <button onclick="loginAdmin()" class="btn">Dashboard</button>
+                <p id="error-msg" style="color:red;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Check for saved user
+        const savedUser = localStorage.getItem('bd_username');
+        if (savedUser) {
+            document.getElementById('quick-login-area').style.display = 'block';
+            document.getElementById('saved-name').innerText = savedUser;
+        }
+
+        function showForm(type) {
+            document.getElementById('user-form').style.display = type === 'user' ? 'block' : 'none';
+            document.getElementById('admin-form').style.display = type === 'admin' ? 'block' : 'none';
+        }
+
+        function loginUser() {
+            const name = document.getElementById('username').value;
+            if (name) {
+                localStorage.setItem('bd_username', name);
+                window.location.href = 'chat.html';
+            }
+        }
+
+        function quickLogin() {
+            window.location.href = 'chat.html';
+        }
+
+        function clearData() {
+            localStorage.removeItem('bd_username');
+            location.reload();
+        }
+
+        function loginAdmin() {
+            const u = document.getElementById('admin-user').value;
+            const p = document.getElementById('admin-pass').value;
+            
+            socket.emit('admin_join', { username: u, password: p });
+            
+            socket.on('admin_login_success', () => {
+                sessionStorage.setItem('isAdmin', 'true');
+                window.location.href = 'admin.html';
+            });
+            
+            socket.on('admin_login_fail', () => {
+                document.getElementById('error-msg').innerText = "Invalid Credentials";
+            });
+        }
+        
+        // Theme persistence
+        if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+    </script>
+</body>
+</html>

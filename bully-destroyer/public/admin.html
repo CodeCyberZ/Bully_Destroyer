@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container" style="max-width: 1200px;">
+        <h2>Admin Dashboard</h2>
+        <div class="chat-container">
+            
+            <div class="sidebar" id="user-list">
+                <p style="padding:10px; opacity:0.6;">Waiting for users...</p>
+            </div>
+
+            <div class="main-chat">
+                <div id="chat-header" style="padding: 15px; border-bottom: 1px solid #ddd; background:rgba(0,0,0,0.02);">
+                    Select a user to chat
+                </div>
+                
+                <div id="messages" class="messages"></div>
+
+                <div class="quick-replies">
+                    <div class="chip" onclick="fillMsg('Hello, how can I help you today?')">Greeting</div>
+                    <div class="chip" onclick="fillMsg('Please stay calm, we are here.')">Reassurance</div>
+                    <div class="chip" onclick="fillMsg('Can you provide more details?')">Ask Details</div>
+                </div>
+
+                <div class="controls">
+                    <input type="text" id="msg-input" placeholder="Reply to user..." style="width:100%;">
+                    <button onclick="sendAdminMessage()" class="btn">Reply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        if(!sessionStorage.getItem('isAdmin')) window.location.href = 'login.html';
+        if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
+
+        let currentTargetId = null;
+
+        // Login as Admin to socket
+        socket.emit('admin_join', {username:'admin', password:'admin123'});
+
+        // Update User List
+        socket.on('update_user_list', (users) => {
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
+            
+            Object.values(users).forEach(u => {
+                const div = document.createElement('div');
+                div.className = 'user-item';
+                div.innerHTML = `<span>${u.username}</span> <span class="status-dot ${u.status}"></span>`;
+                div.onclick = () => loadChat(u);
+                list.appendChild(div);
+            });
+        });
+
+        function loadChat(user) {
+            currentTargetId = user.id;
+            document.getElementById('chat-header').innerHTML = `Chatting with: <b>${user.username}</b>`;
+            const msgContainer = document.getElementById('messages');
+            msgContainer.innerHTML = '';
+
+            // Load History
+            user.messages.forEach(m => displayMessage(m));
+        }
+
+        socket.on('admin_receive_message', ({ userId, msg }) => {
+            if (currentTargetId === userId) {
+                displayMessage(msg);
+            }
+        });
+
+        function displayMessage(msg) {
+            const div = document.createElement('div');
+            div.className = `msg ${msg.sender === 'admin' ? 'self' : 'other'}`;
+            div.innerHTML = `<b>${msg.name}</b>: ${msg.text} <br><small style="font-size:0.7em; opacity:0.7;">${msg.time}</small>`;
+            const container = document.getElementById('messages');
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendAdminMessage() {
+            const input = document.getElementById('msg-input');
+            if (input.value.trim() && currentTargetId) {
+                socket.emit('admin_message', { targetId: currentTargetId, text: input.value });
+                input.value = '';
+            }
+        }
+        
+        function fillMsg(txt) { document.getElementById('msg-input').value = txt; }
+    </script>
+</body>
+</html>
